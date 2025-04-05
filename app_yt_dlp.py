@@ -27,7 +27,7 @@ def index():
 
             # Create a unique ID for this download
             download_id = str(uuid.uuid4())
-            output_path = os.path.join(UPLOAD_FOLDER, f"{download_id}.mp3")
+            output_template = os.path.join(UPLOAD_FOLDER, f"{download_id}.%(ext)s")
 
             print(f"Processing URL: {youtube_url}")
 
@@ -37,7 +37,7 @@ def index():
                 '-x',  # Extract audio
                 '--audio-format', 'mp3',  # Convert to mp3
                 '--audio-quality', '0',  # Best quality
-                '-o', output_path,  # Output file
+                '-o', output_template  # Output file
                 youtube_url  # URL to process
             ]
 
@@ -89,6 +89,14 @@ def is_valid_youtube_url(url):
 
     youtube_match = re.match(youtube_regex, url)
     return youtube_match is not None
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    response = send_file(filepath, as_attachment=True)
+    # Optionally delete file after download
+    # os.remove(filepath)
+    return response
 
 
 if __name__ == '__main__':
